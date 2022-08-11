@@ -5,85 +5,9 @@ import { useParams } from 'react-router-dom'
 import ProjectCheckbox from "./ProjectCheckbox"
 
 
-const UserEditForm = ({ fireFinalActions }) => {
+const CreateForm = ({ fireFinalActions }) => {
 
-    const { user_id } = useParams()
 
-    const [userData, setUserData] = useState({
-        username: '',
-        email: '',
-        password: '',
-        bio: '',
-        role: '',
-        projectTypeInterests: [],
-        locationInterests: [],
-        profilePicture: '',
-    })
-
-    const [locationsChecked, setLocationsChecked] = useState([])
-    const [projectsChecked, setProjectsChecked] = useState([])
-
-    useEffect(() => {
-        loadUser()
-    }, [])
-
-    useEffect(() => {
-        setUserData({
-            ...userData, locationInterests: locationsChecked,
-            projectTypeInterests: projectsChecked
-        })
-    }, [locationsChecked, projectsChecked])
-
-    const receiveLocations = data => {
-        setLocationsChecked(data)
-    }
-
-    const receiveProjects = data => {
-        setProjectsChecked(data)
-    }
-
-    const loadUser = () => {
-        userService
-            .getUser(user_id)
-            .then(({ data }) => {
-                setProjectsChecked(data.projectTypeInterests)
-                setLocationsChecked(data.locationInterests)
-                setUserData(data)
-            })
-            .catch(err => console.log(err))
-    }
-
-    const handleInputChange = e => {
-
-        const { value, name, type, checked } = e.target
-
-        const inputValue = type === 'checkbox' ? checked : value
-
-        setUserData({ ...userData, [name]: inputValue })
-    }
-
-    const handleSubmit = e => {
-        e.preventDefault()
-
-        userService
-            .editUser(user_id, userData)
-            .then(() => fireFinalActions())
-            .catch(err => console.log(err))
-    }
-
-    const handleFileInput = e => {
-        const formData = new FormData()
-        formData.append('imageData', e.target.files[0])
-        uploadService
-            .uploadImage(formData)
-            .then(({ data }) => {
-                const { cloudinary_url: profilePicture } = data
-                setUserData({ ...userData, profilePicture })
-            })
-            .catch(err => console.log(err))
-    }
-
-    const { username, email, bio } = userData
     return (
 
         <Form onSubmit={handleSubmit}>
@@ -94,7 +18,6 @@ const UserEditForm = ({ fireFinalActions }) => {
                         <Form.Control type="text" value={username} onChange={handleInputChange} name="username" />
                     </Form.Group>
                 </Col>
-
                 <Col>
                     <Form.Group className="sm-12 mb-3" controlId="email">
                         <Form.Label>Email</Form.Label>
@@ -117,12 +40,8 @@ const UserEditForm = ({ fireFinalActions }) => {
             </Form.Group>
             <Row>
                 <Col>
-
                     <ProjectCheckbox receiveProjects={receiveProjects} projectsChecked={projectsChecked} />
 
-                </Col>
-                <Col>
-                    <LocationCheckbox locationsChecked={locationsChecked} receiveLocations={receiveLocations} />
                 </Col>
             </Row>
             <Form.Group className='mb-3' controlId='profilePicture'>
@@ -135,4 +54,4 @@ const UserEditForm = ({ fireFinalActions }) => {
         </Form>
     )
 }
-export default UserEditForm
+export default CreateForm
